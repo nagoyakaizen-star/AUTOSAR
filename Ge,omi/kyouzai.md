@@ -868,3 +868,285 @@ Rust および C++（Namespace, Template/STL抽象化）の適用を前提とし
 * **AUTOSAR C++14 / C++17 Guidelines** (Adaptive環境向けC++コーディング規則)
 
 
+# Q4 １２にDevOpsとクラウド開発・運用を入れ、AUTOSAR C++14はMISRA-C++に置き換わったので訂正してください。１１MDBにはMCP(mode context protocol)によるツール連携によるソースコード生成と、図とソースコードの相互変換、ソースコードと仕様書の相互変換を入れ、全体への影響を考慮し、書き直してください。 
+A4 
+ご指摘ありがとうございます。
+
+1. **AUTOSAR C++14 ガイドラインの移行**：2024年に「MISRA C++:2023」へ統合・移管された最新動向を反映します。
+2. **12番へのDevOps・クラウド統合**：SDV時代のCI/CD、Virtual ECU（vECU）、Over-The-Air（OTA）、クラウド環境（AWS/Azure等）での車載ソフトウェア開発・運用を追加します。
+3. **11番（MBD）へのMCPおよび相互変換**：LLM/AIを活用したMCP（Model/Mode Context Protocol）によるツール連携、**「モデル/図 ⇄ C言語ソースコード ⇄ 仕様書/ARXML」の双方向自動変換・トレーサビリティ**を追加します。
+
+これらに伴う関連仕様書・国際規格・ツール連携標準の整理を含め、教材シラバスの関連規格一覧を全編にわたり再構成いたしました。
+
+---
+
+## 1. Cの精神編
+
+組み込みC言語のメモリモデル、ポインタ管理、MISRA C準拠、構造体アライメント、静的リソース配置に加え、**将来的にC言語へ部分輸入（またはC++機能の制限利用）が想定される Namespace や Template（マクロ／型安全なメタプログラミングによる抽象化）** の設計思想を扱います。
+
+### AUTOSAR 仕様書
+
+1. **AUTOSAR_SWS_CompilerAbstraction** (SWS_COMPILER)
+2. **AUTOSAR_SWS_PlatformTypes** (SWS_PLATFORM)
+3. **AUTOSAR_SRS_BSWGeneral** (SRS_BSW)
+4. **AUTOSAR_TR_C Coding Guidelines** (TR_C_CODING_GUIDELINES)
+
+### 関連国際規格・標準
+
+* **ISO/IEC 9899** (C言語標準規格 - C11 / C17 / C23)
+* **ISO/IEC 14882** (C++標準規格 - Namespace, Template 概念の参照・比較用)
+* **MISRA C:2012 / MISRA C:2023** (車載ソフトウェア向けC言語ガイドライン)
+* **CERT C Coding Standard** (SEI CERT C セキュアコーディング標準)
+
+---
+
+## 2. OSEK/VDX OS編
+
+AUTOSAR OSのベースとなる、静的タスクスケジューリング、リソース管理、イベント、アラームなどの標準仕様を扱います。
+
+### AUTOSAR 仕様書
+
+1. **AUTOSAR_SWS_OS** (SWS_OS)
+2. **AUTOSAR_SWS_StandardTypes** (SWS_STDTYPES)
+3. **AUTOSAR_TR_OILDescription** (TR_OIL)
+4. **AUTOSAR_SRS_OS** (SRS_OS)
+
+### 関連国際規格・標準
+
+* **ISO 17356-3** (OSEK/VDX Operating System)
+* **ISO 17356-6** (OSEK Implementation Language: OIL)
+* **ISO 17356-1** (OSEK/VDX System Generation and Configuration)
+
+---
+
+## 3. AUTOSAR OS拡張編
+
+Scalability Class 1〜4（MMU/MPUメモリ保護、OS Application、マルチコア、IOC）、Runnable関数のタスクマッピング、およびクリティカルセクションを安全に保護する Exclusive Area（RTE / SchM による割り込み禁止・リソース占有制御）を扱います。
+
+### AUTOSAR 仕様書
+
+1. **AUTOSAR_SWS_RTE** (SWS_RTE)
+* Runnable EntityのTaskマッピング、および **Exclusive Area（RTE_Enter/RTE_Exit）** のメカニズム
+
+
+2. **AUTOSAR_SWS_OS** (SWS_OS)
+* メモリ保護（Memory Protection）、OS Application、Interrupt / Resource 管理
+
+
+3. **AUTOSAR_SWS_InterOSApplicationCommunicator** (SWS_IOC)
+* コア間・OS Application間の安全なデータ転送（IOC）
+
+
+4. **AUTOSAR_EXP_MulticoreGuide** (EXP_MULTICORE)
+* マルチコア環境での Exclusive Area および排他制御の最適化ガイド
+
+
+
+### 関連国際規格・標準
+
+* **ISO 26262-6** (自動車機能安全 - ソフトウェアアーキテクチャ・設計)
+* **ISO/IEC 23360** (POSIX関連規格 - プロセス/スレッド隔離および排他制御の比較)
+
+---
+
+## 4. CAN通信編
+
+CanIf、CanTP、PduR、COMモジュールを介した信号（Signal）からCANフレームへの変換および送信・受信スタックを扱います。
+
+### AUTOSAR 仕様書
+
+1. **AUTOSAR_SWS_CANMID** (SWS_CAN / CanIf)
+2. **AUTOSAR_SWS_CANTransportLayer** (SWS_CanTp)
+3. **AUTOSAR_SWS_PDURouter** (SWS_PduR)
+4. **AUTOSAR_SWS_COM** (SWS_Com)
+
+### 関連国際規格・標準
+
+* **ISO 11898-1** (CAN Physical/Data Link Layer, CAN FD)
+* **ISO 11898-2** (CAN High-Speed Medium Access Unit)
+* **ISO 15765-2** (DoCAN - Transport protocol and network layer services)
+* **SAE J1939-21** (商用車向けCANデータリンク層・トランスポート層)
+
+---
+
+## 5. Ethernet編
+
+EthIf、EthSM、TcpIp、SoAd、SomeIpXf などを介した車載イーサネットおよびSOME/IP通信スタックを扱います。
+
+### AUTOSAR 仕様書
+
+1. **AUTOSAR_SWS_EthernetInterface** (SWS_EthIf)
+2. **AUTOSAR_SWS_TCPIP** (SWS_TcpIp)
+3. **AUTOSAR_SWS_SocketAdaptor** (SWS_SoAd)
+4. **AUTOSAR_SWS_SOMEIPTransformer** (SWS_SomeIpXf)
+
+### 関連国際規格・標準
+
+* **IEEE 802.3** (Ethernet PHY/MAC規格, 100BASE-T1 / 1000BASE-T1)
+* **IEEE 802.1Q** (VLAN, QoS/Prioritization)
+* **IEEE 1722 / IEEE 802.1AS** (AVB/TSN 時間同期規格 - gPTP)
+* **RFC 791 / RFC 826 / RFC 793 / RFC 768** (IP, ARP, TCP, UDP)
+* **ISO 13400-2** (DoIP - Transport protocol and network layer services)
+
+---
+
+## 6. DIAG（診断）編
+
+DCM、DEM、FIMによる故障診断・DTC記録およびフリーズフレーム処理を扱います。
+
+### AUTOSAR 仕様書
+
+1. **AUTOSAR_SWS_DiagnosticCommunicationManager** (SWS_Dcm)
+2. **AUTOSAR_SWS_DiagnosticEventManager** (SWS_Dem)
+3. **AUTOSAR_SWS_FunctionInhibitionManager** (SWS_Fim)
+4. **AUTOSAR_SWS_DevelopmentErrorTracer** (SWS_Det)
+
+### 関連国際規格・標準
+
+* **ISO 14229-1** (UDS - Unified Diagnostic Services)
+* **ISO 15031-6** (OBD DTC定義規格)
+* **ISO 27145** (WWH-OBD - World-Wide Harmonized OBD)
+* **SAE J1979** (E/E Diagnostic Test Modes)
+
+---
+
+## 7. 不揮発性メモリ編
+
+NvM、MemIf、Fee、Ea に加え、最下層の**Memory Driver（Flash Driver: Fls / EEPROM Driver: Eep）** による物理デバイス操作、ウェアレベリング、データ整合性・CRCチェックを扱います。
+
+### AUTOSAR 仕様書
+
+1. **AUTOSAR_SWS_NVRAMManager** (SWS_NvM)
+2. **AUTOSAR_SWS_MemoryAbstractionInterface** (SWS_MemIf)
+3. **AUTOSAR_SWS_FlashDriver** (SWS_Fls) / **AUTOSAR_SWS_EEPROMDriver** (SWS_Eep)
+4. **AUTOSAR_SWS_FlashEEPROMEmulation** (SWS_Fee) / **AUTOSAR_SWS_EEPROMAbstraction** (SWS_Ea)
+5. **AUTOSAR_SWS_CRC** (SWS_Crc)
+
+### 関連国際規格・標準
+
+* **ISO/IEC 13239** (CRC多項式アルゴリズムの標準規定)
+* **JEDEC JESD22** (半導体不揮発性メモリの信頼性・データ保持規格)
+
+---
+
+## 8. モード管理編
+
+EcuM、BSWM、ComM によるECU起動、シャットダウン、スリープ/ウェイクアップ、通信状態遷移を扱います。
+
+### AUTOSAR 仕様書
+
+1. **AUTOSAR_SWS_ECUStateManager** (SWS_EcuM)
+2. **AUTOSAR_SWS_BSWModeManager** (SWS_BswM)
+3. **AUTOSAR_SWS_ComM** (SWS_ComM)
+4. **AUTOSAR_SWS_WatchdogManager** (SWS_Wdm)
+
+### 関連国際規格・標準
+
+* **ISO 17356-4** (OSEK/VDX Network Management)
+* **ISO 11898-6** (CAN Selective Wake-up / Partial Networking)
+
+---
+
+## 9. セキュリティ編
+
+CSM、SecOC、CryIf、Crypto Driver による暗号化、改ざん防止（MAC）、鍵管理を扱います。
+
+### AUTOSAR 仕様書
+
+1. **AUTOSAR_SWS_SecureOnboardCommunication** (SWS_SecOC)
+2. **AUTOSAR_SWS_CryptoServiceManager** (SWS_Csm)
+3. **AUTOSAR_SWS_CryptoInterface** (SWS_CryIf)
+4. **AUTOSAR_SWS_CryptoDriver** (SWS_Crypto)
+
+### 関連国際規格・標準
+
+* **ISO/SAE 21434** (Road vehicles — Cybersecurity engineering)
+* **NIST FIPS 197** (Advanced Encryption Standard: AES)
+* **NIST SP 800-38D** (Galois/Counter Mode: GCM / GMAC)
+* **SHE (Secure Hardware Extension) Specification**
+
+---
+
+## 10. 安全制御編（SOTIF適用）
+
+ISO 26262（機能安全）および **ISO 21448 (SOTIF)** を軸に、E2E Protection、WdgM、STBM、安全関連診断を扱います。
+
+### AUTOSAR 仕様書
+
+1. **AUTOSAR_SWS_E2ELibrary** (SWS_E2E)
+2. **AUTOSAR_SWS_WatchdogManager** (SWS_Wdm)
+3. **AUTOSAR_SWS_SynchronizedTimeBaseManager** (SWS_StbM)
+4. **AUTOSAR_SWS_RAMTest** (SWS_RamTst) / **AUTOSAR_SWS_CoreTest** (SWS_CorTst)
+
+### 関連国際規格・標準
+
+* **ISO 26262** (Road vehicles — Functional safety)
+* **ISO 21448** (Road vehicles — Safety of the intended functionality: **SOTIF**)
+* **MISRA AC Safety Analysis** (車載モデルベース開発・コード生成向け安全分析)
+
+---
+
+## 11. MBD / SW-C ＆ 次世代AIツールチェーン（MCP・相互変換）編
+
+UML/SysMLおよびAUTOSARメタモデルに基づくSW-C設計や回転機械制御に加え、**MCP（Model Context Protocol）によるLLM/生成AI環境とMBD開発ツールのコンテキスト連携、モデル/図 ⇄ Cコード ⇄ 仕様書（ARXML/Markdown/ReqIF）の双方向自動変換・リバースエンジニアリング**を扱います。
+
+### AUTOSAR 仕様書
+
+1. **AUTOSAR_TPS_SoftwareComponentTemplate** (TPS_SWCT)
+* SW-C構造、Port、Interface (CDD含む) のメタデータ標準
+
+
+2. **AUTOSAR_TPS_AbstractManifestDocumentation** (TPS_AMDoc)
+* 仕様書・トレーサビリティ情報の構造化マニフェスト規定
+
+
+3. **AUTOSAR_SWS_PWMDriver** (SWS_Pwm) / **AUTOSAR_SWS_ICU** (SWS_Icu) / **AUTOSAR_SWS_GPT** (SWS_Gpt)
+* 回転機械（モータ制御等）駆動用MCAL仕様
+
+
+4. **AUTOSAR_TR_Methodology** (TR_MTH)
+* 設計から自動生成、リバース変換までのワークフロー要件
+
+
+
+### 関連国際規格・標準
+
+* **MCP (Model Context Protocol) Specification** (Anthropic発、AI開発ツール・コンテキスト連携の標準規格)
+* **ReqIF (Requirements Interchange Format - OMG)** (仕様書とデザインモデル間の双方向連携規格)
+* **OMG UML 2.5 / SysML 1.6** (モデル図表現)
+* **ISO 26262-8 Clause 11 & 12** (自動コード生成ツールおよび双方向変換ツールの認定・トレーサビリティ規定)
+* **IEEE 1415 / IEC 60034** (回転電機制御標準)
+
+---
+
+## 12. Adaptive Platform 統合 ＆ Vehicle API / DevOps・クラウド編
+
+Rust および C++（Namespace, Template）の適用、**MISRA C++:2023** への準拠、**Vehicle API** によるデータ抽象化、そしてクラウドベースの車載DevOps（Virtual ECU、CI/CDパイプライン、OTA配信、クラウド運用）を統合的に扱います。
+
+### AUTOSAR 仕様書
+
+1. **AUTOSAR_SWS_VehicleAPI** (SWS_VAPI / 新標準仕様案)
+* 車両データ・機能への標準化APIアクセス仕様
+
+
+2. **AUTOSAR_TR_AdaptiveCPIntegration** (TR_APCP)
+* CP / AP統合アーキテクチャおよびクラウド連携ガイド
+
+
+3. **AUTOSAR_SWS_UpdateAndConfigurationManagement** (SWS_UCM)
+* OTA（Over-The-Air）によるソフトウェア更新・構成管理
+
+
+4. **AUTOSAR_EXP_ARA-Introduction** (EXP_ARA)
+* ara::com, ara::exec 含むクラウド/エッジ分散システム基礎
+
+
+
+### 関連国際規格・標準
+
+* **MISRA C++:2023** (AUTOSAR C++14ガイドラインを吸収・統合した最新の車載C++コーディング標準)
+* **W3C VSS (Vehicle Signal Specification)** / **COVESA Vehicle Data Architecture** (Vehicle API標準)
+* **ISO/IEC 14882:2020** (C++20 標準規格)
+* **Rust Reference / Ferrocene Safety Manual** (車載向けRustセーフティ規格)
+* **UNECE R156** (Software Update and Software Update Management System: OTA安全規格)
+* **ISO/IEC 27017 / ISO/IEC 27001** (クラウドセキュリティおよびDevOps運用の国際規格)
